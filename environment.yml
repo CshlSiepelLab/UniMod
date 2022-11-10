@@ -1,0 +1,11 @@
+# The name of the environment
+name: unimod
+# The relevent channels
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- r-base>=4.0
+- r-optparse
+- r-tidyverse
+- bioconductor-plyranges
