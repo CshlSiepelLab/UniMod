@@ -80,5 +80,78 @@ We can also use the same R script to infer landing-pad occupancy,
 
 And in this case, a fifth column phi will show up in the result. These are the $\phi$ estimates referring to the occupancy.  
 
+### Estimate rates based on experimental data
+
+In this section, we will demonstrate how to use the model to estimate transcription rates on real data.
+
+```
+Usage: ./estimate_rates_experiment.R [options]
+Estimate transcription rates based on experimental data
+
+Options:
+	-h, --help
+		Show this help message and exit
+
+	-v, --verbose
+		Print messages [default]
+
+	-q, --quietly
+		Print no messages
+
+	--bwp=CHARACTER
+		Input bigwig file from the plus strand [default NULL]
+
+	--bwm=CHARACTER
+		Input bigwig file from the minus strand [default NULL]
+
+	--grng=CHARACTER
+		Gene regions for read counting [default NULL]
+
+	-s LOGICAL, --steric=LOGICAL
+		Infer landing-pad occupancy or not [default FALSE]
+
+	--scale=CHARACTER
+		A file provides scaling factors for omega [default NULL]
+
+	--type=CHARACTER
+		Scale omega based on [L]ow or [H]igh initiation rate [default L]
+
+	-d CHARACTER, --outputDir=CHARACTER
+		Directory for saving results [default .]
+
+```  
+
+Like what we did in the simulation section, users need to download the [test data]((http://compgen.cshl.edu/yizhao/unimod/data/)) first. The plus.bw and minus.bw files are bigWig files recording PRO-seq read counts, which can be generated via the [proseq2.0](https://github.com/Danko-Lab/proseq2.0) pipeline. In addition, we also need pause and gene body regions for every gene in order to do the read counting. The "granges_for_read_counting.RData" saves these regions for analysis in K562 cells. Essentially, we used CoPRO-cap to precisely determine active TSS, then use these refined TSS to generate regions for read counting. Further details could be found in the "Analysis of Real Data" section [here](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full).    
+
+```
+./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData  
+```
+
+After running this script, a csv file with following columns will be generated:
+
+1. gene_id, Ensemble gene id
+2. chi, the $\chi$ estimates
+3. beta_org, the $\beta$ estimates from the initial model
+4. beta_adp, the $\beta$ estimates from the adapted model which allows pause sites to vary across cells
+5. fk_mean, the mean position of pause sites
+6. fk_var, the variance of the position of pause sites
+
+We can also use the same R script to infer landing-pad occupancy $\phi$, but in this case, we will
+have to scale omega first as we discussed in [our manuscript](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full). We provide "scale_factor.csv" containing the scaling factors we precomputed in K562 cells.  
+
+```
+./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData -s T --scale ../data/scale_factor.csv
+```
+
+In addition to the columns above, four more columns will be included:
+
+7. phi, $\phi$ estimates referring to the occupancy
+8. omega_zeta, $\omega$ is the effective initiation rate
+9. beta_zeta, $\beta$ is the pause escape rate
+10. alpha_zeta, $\alpha$ is the potential initiation rate
+
+Note the last three columns are multiplied by the elongation rate, $\zeta$, which is assumed to be
+2,000 bp/min. So all these columns have the absolute unit "events per minute".
+
 ## Citation
 Zhao, Y., Liu, L. & Siepel, A. Model-based characterization of the equilibrium dynamics of transcription initiation and promoter-proximal pausing in human cells. 2022.10.19.512929 Preprint at [bioRxiv](https://doi.org/10.1101/2022.10.19.512929) (2022).

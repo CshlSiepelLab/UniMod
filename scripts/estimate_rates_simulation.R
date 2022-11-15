@@ -269,7 +269,7 @@ for (i in 1:NROW(bw_dfs)) {
 
     em_ls[[i]] <- main_EM(Xk = rc$Xk[[1]], kmin = kmin, kmax = kmax,
                           fk_int = fk_int, beta_int = rc$beta_int[[1]], chi_hat = rc$chi,
-                          max_itr = 500, tor = 1e-3)
+                          max_itr = 500, tor = 1e-4)
 
   } else {
 
