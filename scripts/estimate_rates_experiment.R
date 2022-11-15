@@ -73,25 +73,25 @@ suppressPackageStartupMessages(
 
 # #### testing files ####
 # root_dir <- "~/Desktop/github/unimod"
-# 
+#
 # grng_in <- file.path(root_dir, "data/granges_for_read_counting.RData")
-# 
+#
 # bwp1_p3_in <- file.path(root_dir, "data/PROseq-K562-vihervaara-control-SE_plus.bw")
 # bwm1_p3_in <- file.path(root_dir, "data/PROseq-K562-vihervaara-control-SE_minus.bw")
-# 
+#
 # helper_in <- file.path(root_dir, "scripts/helper_function.R")
-# 
+#
 # # steric_hindrance <- TRUE
 # steric_hindrance <- FALSE
 # scale_type <- "L"
-# 
+#
 # if (!steric_hindrance) {
 #   em_in <- file.path(root_dir, "scripts/helper_function_em_pause_escape.R")
 # } else {
 #   em_in <- file.path(root_dir, "scripts/helper_function_em_steric_hindrance.R")
 #   scale_in <- file.path(root_dir, "data/scale_factor.csv")
 # }
-# 
+#
 # if (!steric_hindrance) {
 #   result_dir <-
 #     file.path(root_dir, "outputs/experiment", sample_id, "pause_escape")
@@ -138,7 +138,7 @@ bw_pause_filtered <- promoters(bw_pause_filtered, upstream = 0, downstream = kma
 
 # summarize read counts
 rc1_pause <- summarise_bw(bw1_p3, bw_pause_filtered, "sp1")
-rc1_pause$pause_length <- kmax  
+rc1_pause$pause_length <- kmax
 
 rc1_gb <- summarise_bw(bw1_p3, bw_gb_filtered, "sb1")
 rc1_gb$gb_length <-
@@ -179,7 +179,7 @@ em_rate$Xk <- Xk[em_rate$gene_id]
 
 # initialize beta using sum of read counts within pause peak
 em_rate$Xk_sum <- sapply(em_rate$Xk, sum)
-em_rate$beta_int <- em_rate$chi / em_rate$Xk_sum 
+em_rate$beta_int <- em_rate$chi / em_rate$Xk_sum
 
 # initialize fk with some reasonable values based on heuristic
 fk_int <- dnorm(kmin:kmax, mean = 50, sd = 100)
@@ -192,19 +192,19 @@ main_EM <- possibly(main_EM, otherwise = NA)
 if (steric_hindrance) {
   scale_tbl <- read_csv(scale_in, show_col_types = FALSE)
   scale_tbl <- scale_tbl %>% filter(sample_id == {{sample_id}})
-  
+
   if (scale_type == "L") {
     omega_scale <- scale_tbl$omega_scale_l
   } else {
-    omega_scale <- scale_tbl$omega_scale_h  
+    omega_scale <- scale_tbl$omega_scale_h
     }
-  
+
   em_rate$omega_zeta <- em_rate$chi * omega_scale
   em_rate$omega <- em_rate$omega_zeta / zeta
-  
+
   # compute a scaling factor lambda for the purpose of using the same parameters as simulations
-  lambda <- zeta ^ 2 / omega_scale 
-  
+  lambda <- zeta ^ 2 / omega_scale
+
 }
 
 for (i in 1:NROW(em_rate)) {
@@ -239,12 +239,12 @@ em_rate <- em_rate %>% as_tibble()
 if (steric_hindrance) {
   em_rate$phi <- map_dbl(em_ls, "phi", .default = NA)
   em_rate <- em_rate %>%
-    mutate(alpha_zeta = omega_zeta / (1 - phi)) 
+    mutate(alpha_zeta = omega_zeta / (1 - phi))
 }
 
 em_rate <- em_rate %>% left_join(analytical_rate_tbl, by = "gene_id")
 
-print(em_rate)
+# print(em_rate)
 
 if (!steric_hindrance) {
   em_rate %>%
@@ -254,7 +254,6 @@ if (!steric_hindrance) {
   em_rate %>%
     select(gene_id, chi, beta_org, beta_adp, fk_mean, fk_var, phi, omega_zeta) %>%
     mutate(beta_zeta = beta_adp * zeta,
-           alpha_zeta = omega_zeta / (1 - phi)) %>% 
+           alpha_zeta = omega_zeta / (1 - phi)) %>%
     write_csv(rate_tbl_out)
 }
-

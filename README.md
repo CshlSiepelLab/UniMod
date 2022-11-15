@@ -59,7 +59,7 @@ Options:
 The input data is produced by [SimPol](https://github.com/CshlSiepelLab/SimPol), a simulator we developed for simulating the dynamics of RNA Polymerase (RNAP) on DNA template. One of the outputs from SimPol, pos.RDS, records the last 100 steps of the simulation, containing the information of RNAP positions in every cell. Therefore, we can utilize this information to sample cells, then sample read counts conditional on local RNAP frequency. We can later use this synthetic read counts to infer the transcription rates. The whole process is finished by doing
 
 ```
-./estimate_rates_simulation.R -r ../data/k50ksd25kmin17kmax200l1950a1b1z2000zsd1000zmin1500zmax2500t40n20000s33h17_pos.RDS -d ../outputs/simulation
+./estimate_rates_simulation.R -r ../data/k50ksd25kmin17kmax200l1950a1b1z2000zsd1000zmin1500zmax2500t40n20000s33h17_pos.RDS -d ../outputs/simulation/pause_escape
 ```
 
 The prefix "k50ksd25kmin17kmax200l1950a1b1z2000zsd1000zmin1500zmax2500t40n20000s33h17" of the input file
@@ -75,7 +75,7 @@ Details of the model and the simulation could be found in the method section [he
 We can also use the same R script to infer landing-pad occupancy,
 
 ```
-./estimate_rates_simulation.R -r ../data/k50ksd25kmin17kmax200l1950a1b1z2000zsd1000zmin1500zmax2500t40n20000s33h17_pos.RDS -s T -d ../outputs/simulation
+./estimate_rates_simulation.R -r ../data/k50ksd25kmin17kmax200l1950a1b1z2000zsd1000zmin1500zmax2500t40n20000s33h17_pos.RDS -s T -d ../outputs/simulation/steric_hindrance
 ```
 
 And in this case, a fifth column phi will show up in the result. These are the $\phi$ estimates referring to the occupancy.  
@@ -121,10 +121,10 @@ Options:
 
 ```  
 
-Like what we did in the simulation section, users need to download the [test data](http://compgen.cshl.edu/yizhao/unimod/data/) first. The plus.bw and minus.bw files are bigWig files recording PRO-seq read counts, which can be generated via the [proseq2.0](https://github.com/Danko-Lab/proseq2.0) pipeline. In addition, we also need pause and gene body regions for every gene in order to do the read counting. The "granges_for_read_counting.RData" saves these regions for analysis in K562 cells. Essentially, we used CoPRO-cap to precisely determine active TSS, then use these refined TSS to generate regions for read counting. Further details could be found in the "Analysis of Real Data" section [here](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full).    
+Like what we did in the simulation section, users need to download the [test data](http://compgen.cshl.edu/yizhao/unimod/data/) first. The plus.bw and minus.bw are bigWig files recording PRO-seq read counts for the control samples from the heat shock [dataset](https://www.nature.com/articles/s41467-017-00151-0), which can be generated via the [proseq2.0](https://github.com/Danko-Lab/proseq2.0) pipeline. In addition, we also need pause and gene body regions for every gene in order to do the read counting. The "granges_for_read_counting.RData" saves these regions for analysis in K562 cells. Essentially, we used CoPRO-cap to precisely determine active TSS, then use these refined TSS to generate regions for read counting. Further details could be found in the "Analysis of Real Data" section [here](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full).    
 
 ```
-./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData  
+./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData -d ../outputs/experiment/PROseq-K562-vihervaara-control-SE/pause_escape
 ```
 
 After running this script, a csv file with following columns will be generated:
@@ -136,14 +136,20 @@ After running this script, a csv file with following columns will be generated:
 5. fk_mean, the mean position of pause sites
 6. fk_var, the variance of the position of pause sites
 
+We can perform the same analysis on the heat shock treated samples,
+
+```
+./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-treated-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-treated-SE_minus.bw --grng ../data/granges_for_read_counting.RData -d ../outputs/experiment/PROseq-K562-vihervaara-treated-SE/pause_escape
+```
+
 We can also use the same R script to infer landing-pad occupancy $\phi$, but in this case, we will
-have to scale omega first as we discussed in [our manuscript](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full). We provide "scale_factor.csv" containing the scaling factors we precomputed in K562 cells.  
+have to scale the effective initiation rate, $\omega$, as we discussed in [our manuscript](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full). We provide a file ("scale_factor.csv") containing the scaling factors we precomputed for K562 cells.  
 
 ```
-./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData -s T --scale ../data/scale_factor.csv
+./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData -s T --scale ../data/scale_factor.csv -d ../outputs/experiment/PROseq-K562-vihervaara-control-SE/steric_hindrance
 ```
 
-In addition to the columns above, four more columns will be included:
+In addition to the columns 1 to 6 above, four more columns will be included:
 
 7. phi, $\phi$ estimates referring to the occupancy
 8. omega_zeta, $\omega$ is the effective initiation rate
