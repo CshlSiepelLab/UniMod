@@ -121,7 +121,7 @@ Options:
 
 ```  
 
-Like what we did in the simulation section, users need to download the [test data]((http://compgen.cshl.edu/yizhao/unimod/data/)) first. The plus.bw and minus.bw files are bigWig files recording PRO-seq read counts, which can be generated via the [proseq2.0](https://github.com/Danko-Lab/proseq2.0) pipeline. In addition, we also need pause and gene body regions for every gene in order to do the read counting. The "granges_for_read_counting.RData" saves these regions for analysis in K562 cells. Essentially, we used CoPRO-cap to precisely determine active TSS, then use these refined TSS to generate regions for read counting. Further details could be found in the "Analysis of Real Data" section [here](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full).    
+Like what we did in the simulation section, users need to download the [test data](http://compgen.cshl.edu/yizhao/unimod/data/) first. The plus.bw and minus.bw files are bigWig files recording PRO-seq read counts, which can be generated via the [proseq2.0](https://github.com/Danko-Lab/proseq2.0) pipeline. In addition, we also need pause and gene body regions for every gene in order to do the read counting. The "granges_for_read_counting.RData" saves these regions for analysis in K562 cells. Essentially, we used CoPRO-cap to precisely determine active TSS, then use these refined TSS to generate regions for read counting. Further details could be found in the "Analysis of Real Data" section [here](https://www.biorxiv.org/content/10.1101/2022.10.19.512929v1.full).    
 
 ```
 ./estimate_rates_experiment.R --bwp ../data/PROseq-K562-vihervaara-control-SE_plus.bw --bwm ../data/PROseq-K562-vihervaara-control-SE_minus.bw --grng ../data/granges_for_read_counting.RData  
