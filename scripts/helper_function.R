@@ -19,30 +19,3 @@ summarise_bw <-
     colnames(rc) <- c("gene_id", col_name)
     return(rc)
   }
-
-#### functions for condition or species comparison ####
-# quantile normalization
-normalize.quantiles <-
-  function(x) {
-    ## validate inputs
-    x <- as.matrix(x)
-    stopifnot(
-      is.numeric(x),
-      !anyNA(x)
-    )
-
-    ## quantile normalize
-    m <- apply(x, 2, function(v) v[order(v)])
-    dim(m) <- dim(x)    # apply() doesn't always return a matrix!
-
-    row_mean <- rowMeans(m)
-
-    result <- apply(
-      x, 2, function(v, row_mean) row_mean[order(order(v))], row_mean
-    )
-    dim(result) <- dim(x)
-
-    ## propagate dimnames
-    dimnames(result) <- dimnames(x)
-    return(result)
-  }
